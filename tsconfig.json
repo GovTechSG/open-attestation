@@ -9,7 +9,7 @@
     "moduleResolution": "node",
     "strict": true,
     "baseUrl": ".",
-    "typeRoots": ["./src/@types", "./node_modules/@types"],
+    "typeRoots": ["./src/@types", "./src/shared/@types", "./node_modules/@types"],
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "esModuleInterop": true

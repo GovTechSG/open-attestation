@@ -1,0 +1,249 @@
+{
+    "title": "Open Attestation Schema 2.0",
+    "$id": "https://schema.openattestation.com/2.0/schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "identityProofDns": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": ["DNS-TXT"]
+                },
+                "location": {
+                    "type": "string",
+                    "description": "Url of the website referencing to document store"
+                }
+            },
+            "required": ["type", "location"]
+        },
+        "identityProofDid": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": ["DID"]
+                },
+                "key": {
+                    "type": "string",
+                    "description": "Public key associated"
+                }
+            },
+            "required": ["type", "key"]
+        },
+        "identityProofDnsDid": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": ["DNS-DID"]
+                },
+                "key": {
+                    "type": "string",
+                    "description": "Public key associated"
+                },
+                "location": {
+                    "type": "string",
+                    "description": "Url of the website referencing to document store"
+                }
+            },
+            "required": ["type", "key", "location"]
+        },
+        "identityProof": {
+            "type": "object",
+            "oneOf": [
+                { "$ref": "#/definitions/identityProofDns" },
+                { "$ref": "#/definitions/identityProofDnsDid" },
+                { "$ref": "#/definitions/identityProofDid" }
+            ]
+        },
+        "issuer": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "Issuer's id, DID can be used"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Issuer's name"
+                },
+                "revocation": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "enum": ["NONE", "REVOCATION_STORE"]
+                        },
+                        "location": {
+                            "type": "string",
+                            "description": "Smart contract address or url of certificate revocation list for Revocation Store type revocation"
+                        }
+                    }
+                },
+                "identityProof": { "$ref": "#/definitions/identityProof" }
+            },
+            "required": ["name", "identityProof"],
+            "additionalProperties": true
+        },
+        "documentStore": {
+            "allOf": [
+                { "$ref": "#/definitions/issuer" },
+                {
+                    "type": "object",
+                    "properties": {
+                        "documentStore": {
+                            "type": "string",
+                            "pattern": "^0x[a-fA-F0-9]{40}$",
+                            "description": "Smart contract address of document store"
+                        }
+                    },
+                    "required": ["documentStore"]
+                }
+            ]
+        },
+        "certificateStore": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Issuer's name"
+                },
+                "certificateStore": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "deprecationMessage": "Use documentStore and identityProof instead of this",
+                    "description": "Smart contract address of certificate store. Same as documentStore"
+                }
+            },
+            "required": ["name", "certificateStore"],
+            "additionalProperties": true
+        },
+        "tokenRegistry": {
+            "allOf": [
+                { "$ref": "#/definitions/issuer" },
+                {
+                    "type": "object",
+                    "properties": {
+                        "tokenRegistry": {
+                            "type": "string",
+                            "pattern": "^0x[a-fA-F0-9]{40}$",
+                            "description": "Smart contract address of token registry"
+                        }
+                    },
+                    "required": ["tokenRegistry"]
+                }
+            ]
+        }
+    },
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "description": "Internal reference, usually serial number, of this document"
+        },
+        "$template": {
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "description": "Template name to be use by template renderer to determine the template to use"
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "Type of renderer template",
+                            "enum": ["EMBEDDED_RENDERER"]
+                        },
+                        "url": {
+                            "type": "string",
+                            "description": "URL of a decentralised renderer to render this document"
+                        }
+                    },
+                    "required": ["name", "type"]
+                }
+            ]
+        },
+        "documentUrl": {
+            "type": "string",
+            "description": "URL of the stored document"
+        },
+        "issuers": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "title": "issuer",
+                "oneOf": [
+                    {
+                        "$ref": "#/definitions/tokenRegistry"
+                    },
+                    {
+                        "$ref": "#/definitions/documentStore"
+                    },
+                    {
+                        "$ref": "#/definitions/certificateStore"
+                    },
+                    {
+                        "allOf": [
+                            { "$ref": "#/definitions/issuer" },
+                            {
+                                "not": {
+                                    "anyOf": [
+                                        {
+                                            "required": ["certificateStore"]
+                                        },
+                                        {
+                                            "required": ["tokenRegistry"]
+                                        },
+                                        {
+                                            "required": ["documentStore"]
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "minItems": 1
+        },
+        "recipient": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Recipient's name"
+                }
+            },
+            "additionalProperties": true
+        },
+        "attachments": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "filename": {
+                        "type": "string",
+                        "description": "Name of attachment, with appropriate extensions"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "Type of attachment"
+                    },
+                    "data": {
+                        "type": "string",
+                        "description": "Base64 encoding of attachment"
+                    }
+                },
+                "required": ["filename", "type", "data"],
+                "additionalProperties": false
+            }
+        }
+    },
+    "required": ["issuers"],
+    "additionalProperties": true
+}

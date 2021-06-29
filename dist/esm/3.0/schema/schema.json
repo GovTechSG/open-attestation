@@ -1,0 +1,230 @@
+{
+    "title": "Open Attestation Schema 3.0",
+    "$id": "https://schema.openattestation.com/3.0/schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "definitions": {
+        "type": {
+            "oneOf": [
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "issuer": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URI when dereferenced, results in a document containing machine-readable information about the issuer that can be used to verify the information expressed in the credential. More information in https://www.w3.org/TR/vc-data-model/#issuer"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Issuer's name"
+                }
+            },
+            "required": ["id", "name"],
+            "additionalProperties": true
+        }
+    },
+    "properties": {
+        "@context": {
+            "type": "array",
+            "items": {
+                "type": ["string", "object"],
+                "format": "uri"
+            },
+            "description": "List of URI to determine the terminology used in the verifiable credential as explained by https://www.w3.org/TR/vc-data-model/#contexts"
+        },
+        "id": {
+            "type": "string",
+            "format": "uri",
+            "description": "URI to the subject of the credential as explained by https://www.w3.org/TR/vc-data-model/#credential-subject"
+        },
+        "type": {
+            "$ref": "#/definitions/type",
+            "description": "Specific verifiable credential type as explained by https://www.w3.org/TR/vc-data-model/#types"
+        },
+        "reference": {
+            "type": "string",
+            "description": "Internal reference, usually a serial number, of this document"
+        },
+        "name": {
+            "type": "string",
+            "description": "Human readable name of this credential"
+        },
+        "issuanceDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when this credential becomes valid (may be deprecated in favor of issued/validFrom a future version of W3C's VC Data Model)"
+        },
+        "expirationDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when this credential expires"
+        },
+        "issued": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when this credential becomes valid"
+        },
+        "validFrom": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when this credential becomes valid"
+        },
+        "validUntil": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when this credential expires"
+        },
+        "credentialSubject": {
+            "oneOf": [
+                {
+                    "type": "object"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                }
+            ]
+        },
+        "credentialStatus": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "format": "uri",
+                    "examples": ["https://example.edu/status/24"]
+                },
+                "type": {
+                    "type": "string",
+                    "examples": ["CredentialStatusList2017"],
+                    "description": "Express the credential status type (also referred to as the credential status method). It is expected that the value will provide enough information to determine the current status of the credential. For example, the object could contain a link to an external document noting whether or not the credential is suspended or revoked."
+                }
+            },
+            "required": ["id", "type"]
+        },
+        "issuer": {
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/issuer"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "openAttestationMetadata": {
+            "type": "object",
+            "properties": {
+                "template": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "description": "Template name to be use by template renderer to determine the template to use"
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "Type of renderer template",
+                            "enum": ["EMBEDDED_RENDERER"]
+                        },
+                        "url": {
+                            "type": "string",
+                            "description": "URL of a decentralised renderer to render this document",
+                            "pattern": "^(https?)://"
+                        }
+                    },
+                    "required": ["name", "type", "url"],
+                    "additionalProperties": false
+                },
+                "proof": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "description": "Proof method name as explained by https://www.w3.org/TR/vc-data-model/#types",
+                            "enum": ["OpenAttestationProofMethod"]
+                        },
+                        "method": {
+                            "type": "string",
+                            "description": "Proof Open Attestation method",
+                            "enum": ["TOKEN_REGISTRY", "DOCUMENT_STORE", "DID"]
+                        },
+                        "value": {
+                            "description": "Proof value of issuer(s). Smart contract address for TOKEN_REGISTRY & DOCUMENT_STORE, did for DID method",
+                            "type": "string"
+                        },
+                        "revocation": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "description": "Revocation method (if required by proof method)",
+                                    "enum": ["NONE", "REVOCATION_STORE"]
+                                },
+                                "location": {
+                                    "type": "string",
+                                    "description": "Smart contract address or url of certificate revocation list for Revocation Store type revocation"
+                                }
+                            },
+                            "required": ["type"]
+                        }
+                    },
+                    "required": ["type", "method", "value"],
+                    "additionalProperties": true
+                },
+                "identityProof": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "enum": ["DNS-TXT", "DNS-DID", "DID"]
+                        },
+                        "identifier": {
+                            "type": "string",
+                            "description": "Identifier to be shown to end user upon verifying the identity"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "required": ["type", "identifier"]
+                }
+            },
+            "required": ["proof", "identityProof"]
+        },
+        "attachments": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "fileName": {
+                        "type": "string",
+                        "description": "Name of this attachment, with appropriate extensions"
+                    },
+                    "mimeType": {
+                        "type": "string",
+                        "description": "Media type (or MIME type) of this attachment"
+                    },
+                    "data": {
+                        "type": "string",
+                        "description": "Base64 encoding of this attachment"
+                    }
+                },
+                "required": ["fileName", "mimeType", "data"],
+                "additionalProperties": false
+            }
+        }
+    },
+    "required": ["@context", "type", "credentialSubject", "issuer", "issuanceDate", "openAttestationMetadata"],
+    "additionalProperties": true
+}
