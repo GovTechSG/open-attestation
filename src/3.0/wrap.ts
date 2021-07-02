@@ -63,6 +63,7 @@ export const wrapDocument = async <T extends OpenAttestationDocument>(
   if (errors.length > 0) {
     throw new SchemaValidationError("Invalid document", errors, verifiableCredential);
   }
+
   await validateW3C(verifiableCredential);
   return verifiableCredential;
 };

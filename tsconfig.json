@@ -3,13 +3,13 @@
     "files": true
   },
   "compilerOptions": {
-    "lib": ["es2019"],
+    "lib": ["es2019", "es2020"],
     "target": "es5",
     "module": "commonjs",
     "moduleResolution": "node",
     "strict": true,
     "baseUrl": ".",
-    "typeRoots": ["./src/@types", "./node_modules/@types"],
+    "typeRoots": ["./src/shared/@types", "./node_modules/@types"],
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "esModuleInterop": true

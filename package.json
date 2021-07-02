@@ -17,6 +17,7 @@
     "commit": "git-cz",
     "commit:retry": "npm run commit -- --retry",
     "test": "jest",
+    "test:custom-document-loader": "jest src/3.0/schema/schema.test.ts --silent=false",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
     "test:vc": "scripts/runVcTest.sh",
